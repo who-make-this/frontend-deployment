@@ -6,10 +6,8 @@ export default function MissionStatus({ icon, label, value, onClick, bgColor = "
       style={{ backgroundColor: bgColor }}
       className="h-[32px] flex items-center w-full p-1.5 rounded-lg hover:bg-gray-200 justify-between"
     >
-      {/* 아이콘 */}
       <img src={icon} alt={label} className="w-[28px] h-[28px] object-contain" />
 
-      {/* 텍스트 + 숫자 */}
       <div className="flex flex-col items-start">
         <span className="text-[14px] text-white">{label} ({value})</span>
       </div>

@@ -5,7 +5,6 @@ import MissionProgress from '../../component/missionProgress';
 import SecretStory from '../../component/secretStory';
 import { secretStories } from '../../data/stories';
 import CustomPagination from '../../component/CustomPagination';
-
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { EffectFade } from 'swiper/modules';
 

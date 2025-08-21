@@ -5,6 +5,7 @@ import MainPage from "./pages/main/mainPage";
 import MissionPage from "./pages/mission/missionpage";
 import MyPage from "./pages/mypage/mypage";
 import Secretpage from "./pages/secretstory/secretpage";
+import ReportPage from "./pages/reportpage/report";
 
 function App() {
   const baseWidth = 375;
@@ -41,6 +42,7 @@ function App() {
               <Route path="/mission" element={<MissionPage />} />
               <Route path="/mypage" element={<MyPage />} />
               <Route path="/secret" element={<Secretpage />} />
+              <Route path="/report" element={<ReportPage />} />
             </Routes>
           </div>
         </Router>

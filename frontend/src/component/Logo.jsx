@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-
+import { Link } from 'react-router-dom';
 export default function Logo({
     textColor = 'text-white',
     iconColor = 'white'
 }) {
     const [menuOpen, setMenuOpen] = useState(false);
-
+    const closeMenu = () => setMenuOpen(false);
     const menuIconSvg = (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M3.5 12H20.5" stroke={iconColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -22,10 +22,9 @@ export default function Logo({
     );
 
     return (
-        // Added `fixed top-0` and `w-full`
         <header className={`fixed w-full z-20 transition-all duration-[250ms] overflow-hidden ${menuOpen ? "h-[215px]" : "h-[54px]"} backdrop-blur-[10px]`}>
             <div className="flex items-center h-[54px] w-full">
-                <button className="ml-[13px] py-2">
+                <Link to="/" className="ml-[13px] py-2">
                     <span
                         className={textColor}
                         style={{
@@ -38,7 +37,7 @@ export default function Logo({
                     >
                         시장탐험대
                     </span>
-                </button>
+                </Link>
                 <button
                     className="ml-auto mr-[15px] transition-all duration-[250ms] relative w-6 h-6 flex items-center justify-center"
                     onClick={() => setMenuOpen(!menuOpen)}
@@ -54,9 +53,15 @@ export default function Logo({
             <div className={`w-full transition-all duration-[250ms] ${menuOpen ? "opacity-100 py-4" : "opacity-0 py-0"} flex flex-col items-start px-3 py-1 space-y-7`}>
                 {menuOpen && (
                     <>
-                        <button className={`${textColor} text-[16px] font-bold`}>시장의 비밀 이야기</button>
-                        <button className={`${textColor} text-[16px] font-bold`}>탐험 일지</button>
-                        <button className={`${textColor} text-[16px] font-bold`}>탐험가 정보</button>
+                        <Link to="/secret" className={`${textColor} text-[16px] font-bold`} onClick={closeMenu}>
+                            시장의 비밀 이야기
+                        </Link>
+                        <Link to="/report" className={`${textColor} text-[16px] font-bold`} onClick={closeMenu}>
+                            탐험 일지
+                        </Link>
+                        <Link to="/mypage" className={`${textColor} text-[16px] font-bold`} onClick={closeMenu}>
+                            탐험가 정보
+                        </Link>
                     </>
                 )}
             </div>

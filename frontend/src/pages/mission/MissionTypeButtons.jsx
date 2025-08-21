@@ -1,6 +1,6 @@
 import MissionStatus from "../../component/missionStatus";
 
-export default function missionTypeButtons({
+export default function MissionTypeButtons({
   missionTypesWithCount,
   selectedType,
   setSelectedType,

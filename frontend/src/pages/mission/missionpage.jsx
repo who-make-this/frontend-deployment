@@ -97,7 +97,8 @@ export default function MissionPage() {
   };
 
   useEffect(() => {
-    document.body.style.overflow = popupVisible || cannotExitVisible ? "hidden" : "";
+    document.body.style.overflow =
+      popupVisible || cannotExitVisible ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
     };
@@ -109,14 +110,18 @@ export default function MissionPage() {
   }, []);
 
   const selectedTypeColor = selectedType
-    ? missionTypes.find(type => type.type === selectedType)?.bgColor.slice(0, 7)
+    ? missionTypes
+        .find((type) => type.type === selectedType)
+        ?.bgColor.slice(0, 7)
     : null;
-    
-  const gradientColor = selectedTypeColor ? `${selectedTypeColor}60` : "#2B2B2B80";
+
+  const gradientColor = selectedTypeColor
+    ? `${selectedTypeColor}60`
+    : "#2B2B2B80";
 
   // 선택된 타입에 해당하는 완료된 미션 목록
   const completedMissionsOfType = selectedType
-    ? collectedMissions.filter(m => m.type === selectedType)
+    ? collectedMissions.filter((m) => m.type === selectedType)
     : [];
 
   return (
@@ -134,9 +139,9 @@ export default function MissionPage() {
         {/* 배경 오버레이 */}
         <div
           className="absolute top-0 left-0 w-full h-full pointer-events-none z-0 backdrop-blur-[10px]"
-          style={{ backgroundColor: "#2B2B2BB2"}}
+          style={{ backgroundColor: "#2B2B2BB2" }}
         />
-        
+
         {/* 새로운 그라데이션 블러 오버레이 */}
         <div
           className="absolute top-0 left-0 w-full h-full pointer-events-none z-10"
@@ -162,7 +167,11 @@ export default function MissionPage() {
               onMouseEnter={() => setRefreshHovered(true)}
               onMouseLeave={() => setRefreshHovered(false)}
               className={`w-10 h-10 flex items-center backdrop-blur-[4px] justify-center rounded-full transition
-                ${refreshHovered ? "bg-white/50" : "bg-white/20 hover:bg-white/50"}`}
+                ${
+                  refreshHovered
+                    ? "bg-white/50"
+                    : "bg-white/20 hover:bg-white/50"
+                }`}
               aria-label="미션 새로고침"
             >
               <img
@@ -246,7 +255,10 @@ export default function MissionPage() {
                 <div className="flex gap-3">
                   <button
                     className="flex-1 py-3 rounded-full bg-gray-200 text-gray-800"
-                    onClick={closePopup}
+                    onClick={() => {
+                      closePopup();
+                      navigate("/report");
+                    }}
                   >
                     그만하기
                   </button>

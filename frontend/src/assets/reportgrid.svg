@@ -1,0 +1,12 @@
+<svg width="309" height="464" viewBox="0 0 309 464" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M20 93V92.5H19.5V93H20ZM120 93H120.5V92.5H120V93ZM20 93V93.5H120V93V92.5H20V93ZM120 93H119.5V205H120H120.5V93H120ZM20 205H20.5V93H20H19.5V205H20Z" fill="#2B2B2B" fill-opacity="0.8"/>
+<path d="M120 93V92.5H119.5V93H120ZM289 93H289.5V92.5H289V93ZM120 93V93.5H289V93V92.5H120V93ZM289 93H288.5V205H289H289.5V93H289ZM120 205H120.5V93H120H119.5V205H120Z" fill="#2B2B2B" fill-opacity="0.8"/>
+<rect width="169" height="34" transform="translate(120 93)" fill="#2B2B2B" fill-opacity="0.8"/>
+<path d="M289 264V264.5H289.5V264H289ZM20 264H19.5V264.5H20V264ZM289 205H288.5V264H289H289.5V205H289ZM289 264V263.5H20V264V264.5H289V264ZM20 264H20.5V205H20H19.5V264H20Z" fill="#2B2B2B" fill-opacity="0.8"/>
+<rect width="89.6667" height="30" transform="translate(20 205)" fill="#2B2B2B" fill-opacity="0.8"/>
+<rect width="89.6667" height="30" transform="translate(109.667 205)" fill="#2B2B2B" fill-opacity="0.8"/>
+<rect width="89.6667" height="30" transform="translate(199.333 205)" fill="#2B2B2B" fill-opacity="0.8"/>
+<line x1="199.5" y1="235" x2="199.5" y2="264" stroke="#2B2B2B" stroke-opacity="0.8"/>
+<line x1="109.5" y1="235" x2="109.5" y2="264" stroke="#2B2B2B" stroke-opacity="0.8"/>
+<rect x="20" y="264" width="269" height="124" stroke="#2B2B2B" stroke-opacity="0.8"/>
+</svg>
