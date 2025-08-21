@@ -2,7 +2,7 @@ import React from 'react';
 import ReportCardFrame from '../assets/reportpage.svg';
 import HeadphoneIcon from '../assets/gumilogo.svg';
 import StampSuccess from '../assets/successStamp.svg';
-import ReportGrid from '../assets/reportgrid.svg';
+import ReportGrid from '../assets/reportGrid.svg';
 import ClocheIcon from '../assets/typeeat.svg';
 import TravelIcon from '../assets/typetravel.svg';
 import MoodIcon from '../assets/typemood.svg';
