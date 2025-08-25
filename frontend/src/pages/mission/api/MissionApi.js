@@ -61,10 +61,11 @@ export async function authenticateMission(missionId, imageFile) {
       `/missions/authenticate/${missionId}`,
       formData
     );
-    console.log("[미션 인증] mission data:", response.data);
+
+    console.log('[미션 인증] mission data:', response.data);
     return response.data;
   } catch (error) {
-    console.error("미션 인증 실패:", error.response?.data || error.message);
+    console.error('미션 인증 실패:', error.response?.data || error.message);
     throw error;
   }
 }
