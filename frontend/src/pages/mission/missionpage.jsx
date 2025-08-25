@@ -126,6 +126,7 @@ export default function MissionPage() {
     const fileInput = document.createElement("input");
     fileInput.type = "file";
     fileInput.accept = "image/*";
+    fileInput.capture = "environment";
     fileInput.click();
 
     fileInput.onchange = async () => {
