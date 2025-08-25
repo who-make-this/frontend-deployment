@@ -24,7 +24,6 @@ import {
 
 export default function MissionPage() {
   const marketId = 1;
-
   const navigate = useNavigate();
 
   const [selectedType, setSelectedType] = useState(null);
@@ -35,7 +34,7 @@ export default function MissionPage() {
   const [randomMission, setRandomMission] = useState(null);
   const [collectedMissions, setCollectedMissions] = useState([]);
   const [authResult, setAuthResult] = useState(null);
-  const [authInProgress, setAuthInProgress] = useState(false); // 인증 중 상태
+  const [authInProgress, setAuthInProgress] = useState(false);
   const hasFetched = useRef(false);
 
   const [refreshClicked, setRefreshClicked] = useState(false);
@@ -47,6 +46,12 @@ export default function MissionPage() {
     { category: "모험형", count: 5, icon: typeTravel, bgColor: "#889F6960" },
   ];
 
+  // 각 타입별 완료 미션 수 계산
+  const missionTypesWithCount = missionTypes.map((m) => ({
+    ...m,
+    count: collectedMissions.filter((cm) => cm.category === m.category).length,
+  }));
+
   // 초기 랜덤 미션 불러오기
   useEffect(() => {
     if (hasFetched.current) return;
@@ -56,7 +61,6 @@ export default function MissionPage() {
       try {
         await createMission(marketId);
         await new Promise((resolve) => setTimeout(resolve, 300));
-
         const mission = await getRandomMission(marketId);
         setRandomMission(mission);
       } catch (err) {
@@ -77,14 +81,11 @@ export default function MissionPage() {
         const allCompleted = await Promise.all(
           missionTypes.map((type) => getCompletedMissions(type.category))
         );
-
-        const merged = allCompleted.flat();
-        setCollectedMissions(merged);
+        setCollectedMissions(allCompleted.flat());
       } catch (error) {
         console.error("완료된 미션 불러오기 실패:", error);
       }
     };
-
     fetchCompletedMissions();
   }, []);
 
@@ -101,14 +102,7 @@ export default function MissionPage() {
     }
   };
 
-  const closeCannotExit = () => {
-    setCannotExitVisible(false);
-  };
-
-  const missionTypesWithCount = missionTypes.map((m) => ({
-    ...m,
-    count: collectedMissions.filter((cm) => cm.category === m.category).length,
-  }));
+  const closeCannotExit = () => setCannotExitVisible(false);
 
   const handleRefreshClick = async () => {
     setRefreshClicked(true);
@@ -135,20 +129,13 @@ export default function MissionPage() {
       setAuthInProgress(true);
 
       try {
-        // 서버로 인증 요청
-        const updatedMission = await authenticateMission(
-          randomMission.id,
-          file
-        );
+        const updatedMission = await authenticateMission(randomMission.id, file);
 
-        // 상태 업데이트
         setRandomMission(updatedMission);
 
         const completed = await getCompletedMissions(updatedMission.category);
         setCollectedMissions((prev) => {
-          const filtered = prev.filter(
-            (m) => m.category !== updatedMission.category
-          );
+          const filtered = prev.filter((m) => m.category !== updatedMission.category);
           return [...filtered, ...completed];
         });
 
@@ -161,13 +148,8 @@ export default function MissionPage() {
           });
         }
       } catch (err) {
-        console.error(
-          "미션 인증 요청 실패:",
-          err.response?.data || err.message
-        );
-        const failureReason =
-          err.response?.data?.failureReason ||
-          "인증 요청 중 오류가 발생했습니다.";
+        console.error("미션 인증 요청 실패:", err.response?.data || err.message);
+        const failureReason = err.response?.data?.failureReason || "인증 요청 중 오류가 발생했습니다.";
         setAuthResult({ type: "error", message: failureReason });
       } finally {
         setAuthInProgress(false);
@@ -176,55 +158,35 @@ export default function MissionPage() {
   };
 
   useEffect(() => {
-    document.body.style.overflow =
-      popupVisible || cannotExitVisible ? "hidden" : "";
+    document.body.style.overflow = popupVisible || cannotExitVisible ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
     };
   }, [popupVisible, cannotExitVisible]);
 
   const selectedTypeColor = selectedType
-    ? missionTypes
-        .find((category) => category.category === selectedType)
-        ?.bgColor.slice(0, 7)
+    ? missionTypes.find((category) => category.category === selectedType)?.bgColor.slice(0, 7)
     : null;
 
-  const gradientColor = selectedTypeColor
-    ? `${selectedTypeColor}60`
-    : "#2B2B2B80";
+  const gradientColor = selectedTypeColor ? `${selectedTypeColor}60` : "#2B2B2B80";
 
-  // 선택된 category에 해당하는 완료된 미션 목록
   const completedMissionsOfType = selectedType
     ? collectedMissions.filter((m) => m.category === selectedType)
     : [];
 
   return (
     <div className="w-[375px] h-[812px] flex min-h-screen bg-gray-100">
-      <div className="fixed top-0 left-0 w-full z-50">
-        <Logo />
-      </div>
+      <div className="fixed top-0 left-0 w-full z-50"><Logo /></div>
+
       <div className="bg-white shadow-sm relative flex items-center justify-center overflow-hidden ">
-        <img
-          src={MainPageImg}
-          alt="Main Page"
-          className="w-full h-full object-cover"
-        />
+        <img src={MainPageImg} alt="Main Page" className="w-full h-full object-cover" />
 
-        {/* 배경 오버레이 */}
-        <div
-          className="absolute top-0 left-0 w-full h-full pointer-events-none z-0 backdrop-blur-[10px]"
-          style={{ backgroundColor: "#2B2B2BB2" }}
-        />
+        <div className="absolute top-0 left-0 w-full h-full pointer-events-none z-0 backdrop-blur-[10px]"
+             style={{ backgroundColor: "#2B2B2BB2" }} />
 
-        {/* 새로운 그라데이션 블러 오버레이 */}
-        <div
-          className="absolute top-0 left-0 w-full h-full pointer-events-none z-10"
-          style={{
-            background: `linear-gradient(to top right, transparent, 60%, ${gradientColor})`,
-          }}
-        />
+        <div className="absolute top-0 left-0 w-full h-full pointer-events-none z-10"
+             style={{ background: `linear-gradient(to top right, transparent, 60%, ${gradientColor})` }} />
 
-        {/* 타입 버튼 영역 */}
         <div className="absolute left-4 top-16 flex flex-row w-[330px] z-20 items-center">
           <MissionTypeButtons
             missionTypesWithCount={missionTypesWithCount}
@@ -233,42 +195,27 @@ export default function MissionPage() {
           />
         </div>
 
-        {/* 카드 영역 위에 새로고침 버튼 추가 */}
         <div className="absolute top-[140px] right-8 z-30">
-          {!selectedType ? (
+          {!selectedType && (
             <button
               onClick={handleRefreshClick}
               onMouseEnter={() => setRefreshHovered(true)}
               onMouseLeave={() => setRefreshHovered(false)}
               className={`w-10 h-10 flex items-center backdrop-blur-[4px] justify-center rounded-full transition
-                ${
-                  refreshHovered
-                    ? "bg-white/50"
-                    : "bg-white/20 hover:bg-white/50"
-                }`}
+                ${refreshHovered ? "bg-white/50" : "bg-white/20 hover:bg-white/50"}`}
               aria-label="미션 새로고침"
             >
-              <img
-                src={refreshHovered || refreshClicked ? refresh_black : refresh}
-                alt="새로고침 아이콘"
-                className="w-6 h-6"
-                draggable={false}
-              />
+              <img src={refreshHovered || refreshClicked ? refresh_black : refresh} alt="새로고침 아이콘" className="w-6 h-6" draggable={false} />
             </button>
-          ) : null}
+          )}
         </div>
 
-        {/* 기존 카드 영역 */}
-        <div
-          className={`absolute flex flex-col items-center z-20 gap-4 px-4 overflow-auto h-[464px] max-w-[312px] hide-scrollbar ${
-            selectedType ? "top-[120px] h-full" : "top-[160px] h-[464px]"
-          }`}
-        >
+        <div className={`absolute flex flex-col items-center z-20 gap-4 px-4 overflow-auto h-[464px] max-w-[312px] hide-scrollbar ${selectedType ? "top-[120px] h-full" : "top-[160px] h-[464px]"}`}>
           {selectedType ? (
             completedMissionsOfType.length > 0 ? (
               <CompleteMission missions={completedMissionsOfType} />
             ) : (
-              <div className="text-white  text-center text-lg mt-50">
+              <div className="text-white text-center text-lg mt-50">
                 아직 성공한 미션이 없어요...
               </div>
             )
@@ -277,127 +224,74 @@ export default function MissionPage() {
           )}
         </div>
 
-        {/* 하단 버튼 */}
-        <div>
-          {!selectedType ? (
-            <div className="absolute bottom-32 left-1/2 -translate-x-1/2 w-78 px-4 flex justify-between z-50">
-              <button
-                onClick={openPopup}
-                className="w-33 h-[50px] flex items-center px-4 border border-white rounded-xl text-white duration-250 ease-in-out active:bg-[#ffffffb9]"
-              >
-                <img
-                  src={exit}
-                  className="w-[24px] h-[24px] object-contain"
-                  alt="탐험 종료"
-                />
-                <div className="ps-2 font-medium">탐험 종료</div>
-              </button>
-              <button
-                onClick={handleAuthenticateClick}
-                className="w-33 h-[50px] flex items-center px-4 border border-black rounded-xl text-black bg-white duration-250 ease-in-out active:bg-[#A47764] active:text-white active:font-bold"
-              >
-                <img
-                  src={vectorCamera}
-                  className="w-[24px] h-[24px] object-contain"
-                  alt="미션 인증"
-                />
-                <div className="ps-2 font-medium">미션 인증</div>
-              </button>
-            </div>
-          ) : null}
-        </div>
+        {!selectedType && (
+          <div className="absolute bottom-32 left-1/2 -translate-x-1/2 w-78 px-4 flex justify-between z-50">
+            <button
+              onClick={openPopup}
+              className="w-33 h-[50px] flex items-center px-4 border border-white rounded-xl text-white duration-250 ease-in-out active:bg-[#ffffffb9]"
+            >
+              <img src={exit} className="w-[24px] h-[24px] object-contain" alt="탐험 종료" />
+              <div className="ps-2 font-medium">탐험 종료</div>
+            </button>
 
-        {authInProgress && (
-          <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black/70">
-            <img
-              src={loading}
-              alt="인증 중 로딩"
-              className="w-16 h-16 animate-spin mb-4"
-            />
-            <div className="text-white text-xl font-semibold">
-              이미지 검토 중...
-            </div>
+            <button
+              onClick={handleAuthenticateClick}
+              className="w-33 h-[50px] flex items-center px-4 border border-black rounded-xl text-black bg-white duration-250 ease-in-out active:bg-[#A47764] active:text-white active:font-bold"
+            >
+              <img src={vectorCamera} className="w-[24px] h-[24px] object-contain" alt="미션 인증" />
+              <div className="ps-2 font-medium">미션 인증</div>
+            </button>
           </div>
         )}
 
-        {/* 인증 결과 팝업 */}
+        {authInProgress && (
+          <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black/70">
+            <img src={loading} alt="인증 중 로딩" className="w-16 h-16 animate-spin mb-4" />
+            <div className="text-white text-xl font-semibold">이미지 검토 중...</div>
+          </div>
+        )}
+
         {authResult && (
           <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/70">
             <div className="w-[349px] h-auto bg-white rounded-3xl p-8 flex flex-col justify-between">
               <div>
-                <div className="text-2xl font-medium">
-                  {authResult.type === "success"
-                    ? "미션 성공!"
-                    : "미션 실패..."}
-                </div>
-                <div className="mt-3 mb-6">
-                  {authResult.type === "success"
-                    ? "미션을 성공적으로 완료했어요! 계속 탐험하며 다음 미션에 도전해보세요."
-                    : authResult.message}
-                </div>
+                <div className="text-2xl font-medium">{authResult.type === "success" ? "미션 성공!" : "미션 실패..."}</div>
+                <div className="mt-3 mb-6">{authResult.type === "success" ? "미션을 성공적으로 완료했어요! 계속 탐험하며 다음 미션에 도전해보세요." : authResult.message}</div>
               </div>
 
               <div className="flex gap-3">
-                {/* 실패일 때만 취소 버튼 */}
                 {authResult.type === "error" && (
-                  <button
-                    onClick={() => setAuthResult(null)}
-                    className="flex-1 py-3 rounded-full bg-gray-200 text-gray-800"
-                  >
-                    취소
-                  </button>
+                  <button onClick={() => setAuthResult(null)} className="flex-1 py-3 rounded-full bg-gray-200 text-gray-800">취소</button>
                 )}
 
-                {/* 오른쪽 버튼 */}
                 <button
-                  className={`py-3 rounded-full bg-[#9A8C4F] text-white ${
-                    authResult.type === "success" ? "w-[50%] ml-auto" : "flex-1"
-                  }`}
+                  className={`py-3 rounded-full bg-[#9A8C4F] text-white ${authResult.type === "success" ? "w-[50%] ml-auto" : "flex-1"}`}
                   onClick={async () => {
                     if (authResult.type === "success") {
-                      // 다음 미션 불러오기
                       const mission = await getRandomMission(marketId);
                       setRandomMission(mission);
                     } else if (authResult.type === "error") {
                       handleAuthenticateClick();
                     }
-                    setAuthResult(null); // 팝업 닫기
+                    setAuthResult(null);
                   }}
                 >
-                  {authResult.type === "success"
-                    ? "다음 미션으로"
-                    : "다시 인증하기"}
+                  {authResult.type === "success" ? "다음 미션으로" : "다시 인증하기"}
                 </button>
               </div>
             </div>
           </div>
         )}
 
-        {/* 탐험 종료 팝업 */}
         {popupVisible && (
           <>
-            <div
-              className={`absolute inset-0 z-40 transition-opacity duration-300 ${
-                popupActive ? "opacity-100" : "opacity-0"
-              }`}
-              style={{ backgroundColor: "rgba(0,0,0,0.8)" }}
-              onClick={closePopup}
-            />
-            <div
-              role="dialog"
-              aria-modal="true"
-              className={`absolute bottom-0 left-0 w-full z-50 transform transition-transform duration-300 ease-out ${
-                popupActive ? "translate-y-0" : "translate-y-full"
-              }`}
-            >
+            <div className={`absolute inset-0 z-40 transition-opacity duration-300 ${popupActive ? "opacity-100" : "opacity-0"}`} style={{ backgroundColor: "rgba(0,0,0,0.8)" }} onClick={closePopup} />
+            <div role="dialog" aria-modal="true" className={`absolute bottom-0 left-0 w-full z-50 transform transition-transform duration-300 ease-out ${popupActive ? "translate-y-0" : "translate-y-full"}`}>
               <div className="bg-white rounded-t-2xl p-8 pb-16">
                 <div className="text-2xl font-medium p-1">탐험 종료</div>
                 <div className="p-1 mb-6">
-                  하루에 한 번만 탐험이 가능합니다. 지금 탐험을 종료하면, 오늘은
-                  더 이상 진행할 수 없어요.
-                  <div className="text-[#9A8C4F]">
-                    ( 해커톤 행사 기간엔 해당 없음 )
-                  </div>
+                  하루에 한 번만 탐험이 가능합니다. 지금 탐험을 종료하면, 오늘은 더 이상 진행할 수 없어요.
+                  <div className="text-[#9A8C4F]">( 해커톤 행사 기간엔 해당 없음 )</div>
                 </div>
                 <div className="flex gap-3">
                   <button
@@ -416,41 +310,19 @@ export default function MissionPage() {
                   >
                     그만하기
                   </button>
-                  <button
-                    className="flex-1 py-3 rounded-full bg-[#9A8C4F] text-white"
-                    onClick={closePopup}
-                  >
-                    탐험 계속하기
-                  </button>
+                  <button onClick={closePopup} className="flex-1 py-3 rounded-full bg-[#9A8C4F] text-white">탐험 계속하기</button>
                 </div>
               </div>
             </div>
           </>
         )}
 
-        {/* 탐험 종료 불가 팝업 */}
         {cannotExitVisible && (
-          <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/70">
-            <div className="w-[349px] h-[236px] bg-white rounded-2xl p-8">
-              <div className="text-2xl font-medium p-1">탐험 종료 불가</div>
-              <div className="p-1 mb-6">
-                아직 미션이 하나도 완료되지 않았어요! 미션 1개 이상 수행 후
-                종료할 수 있어요.
-              </div>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => navigate("/")}
-                  className="flex-1 py-3 rounded-full bg-gray-200 text-gray-800"
-                >
-                  나가기
-                </button>
-                <button
-                  onClick={closeCannotExit}
-                  className="flex-1 py-3 rounded-full bg-[#9A8C4F] text-white"
-                >
-                  탐험 계속하기
-                </button>
-              </div>
+          <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50">
+            <div className="bg-white rounded-3xl p-8 flex flex-col items-center">
+              <div className="text-2xl font-medium p-1">탐험 종료 실패</div>
+              <div className="p-1 mb-6">탐험을 종료할 수 없어요. 최소 한 개 이상의 미션을 완료해야 합니다.</div>
+              <button className="py-3 px-8 rounded-full bg-[#9A8C4F] text-white" onClick={closeCannotExit}>확인</button>
             </div>
           </div>
         )}
