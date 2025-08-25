@@ -3,7 +3,9 @@ import MainPageImg from "../../assets/mainPage.svg";
 import Logo from "../../component/Logo";
 import Moheom from "./moheom";
 
-export default function MainPage() {
+
+export default function MainPage({ setIsMissionActive }) {
+
   return (
     <div className="w-[375px] h-[812px] flex min-h-screen bg-gray-100">
       <div className="fixed top-0 left-0 w-full z-30">
@@ -21,7 +23,7 @@ export default function MainPage() {
         />
 
         <div className="absolute pt-[460px] top-[101px] left-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
-          <Moheom />
+          <Moheom setIsMissionActive={setIsMissionActive} />
         </div>
       </div>
     </div>

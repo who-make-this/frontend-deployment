@@ -1,7 +1,16 @@
 @import "tailwindcss";
 
 
+/* 크롬, 사파리, 오페라 */
+body::-webkit-scrollbar {
+  display: none;
+}
 
+/* 파이어폭스 */
+body {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+}
 
 
 

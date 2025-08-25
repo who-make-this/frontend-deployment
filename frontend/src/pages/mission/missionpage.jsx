@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import MainPageImg from "../../assets/mainPage.svg";
 import Logo from "../../component/Logo";
 import MissionCard from "../../component/missionCard";
@@ -11,61 +11,82 @@ import exit from "../../assets/exit.svg";
 import vectorCamera from "../../assets/vectorCamera.svg";
 import refresh from "../../assets/iconoir_refresh.svg";
 import refresh_black from "../../assets/iconoir_refresh_black.svg";
+import loading from "../../assets/loading.svg";
 import { useNavigate } from "react-router-dom";
+import {
+  getRandomMission,
+  createMission,
+  getCompletedMissions,
+  authenticateMission,
+  endMission,
+  getCompletedImages,
+} from "./api/MissionApi";
 
 export default function MissionPage() {
+  const marketId = 1;
+
   const navigate = useNavigate();
 
+  const [selectedType, setSelectedType] = useState(null);
   const [popupVisible, setPopupVisible] = useState(false);
   const [popupActive, setPopupActive] = useState(false);
-  const [selectedType, setSelectedType] = useState(null);
-  const [randomMission, setRandomMission] = useState(null);
   const [cannotExitVisible, setCannotExitVisible] = useState(false);
+
+  const [randomMission, setRandomMission] = useState(null);
+  const [collectedMissions, setCollectedMissions] = useState([]);
+  const [authResult, setAuthResult] = useState(null);
+  const [authInProgress, setAuthInProgress] = useState(false); // 인증 중 상태
+  const hasFetched = useRef(false);
 
   const [refreshClicked, setRefreshClicked] = useState(false);
   const [refreshHovered, setRefreshHovered] = useState(false);
 
   const missionTypes = [
-    { type: "감성형", count: 12, icon: typeMood, bgColor: "#A792B960" },
-    { type: "먹보형", count: 8, icon: typeEat, bgColor: "#D19B9860" },
-    { type: "탐험형", count: 5, icon: typeTravel, bgColor: "#889F6960" },
+    { category: "감성형", count: 12, icon: typeMood, bgColor: "#A792B960" },
+    { category: "먹보형", count: 8, icon: typeEat, bgColor: "#D19B9860" },
+    { category: "모험형", count: 5, icon: typeTravel, bgColor: "#889F6960" },
   ];
 
-  const currentMissions = [
-    {
-      type: "감성형",
-      number: 5,
-      title: "하늘 사진 찍기",
-      description: "구름 포함",
-    },
-    {
-      type: "먹보형",
-      number: 1,
-      title: "라면 먹기",
-      description: "편의점에서",
-    },
-  ];
+  // 초기 랜덤 미션 불러오기
+  useEffect(() => {
+    if (hasFetched.current) return;
+    hasFetched.current = true;
 
-  const collectedMissions = [
-    {
-      type: "감성형",
-      title: "벚꽃 사진",
-      number: "2",
-      description: "봄에 찍은 사진",
-    },
-    {
-      type: "감성형",
-      title: "노을 사진",
-      number: "2",
-      description: "해질 무렵",
-    },
-    {
-      type: "먹보형",
-      title: "햄버거 먹기",
-      number: "2",
-      description: "세트 메뉴",
-    },
-  ];
+    (async () => {
+      try {
+        await createMission(marketId);
+        await new Promise((resolve) => setTimeout(resolve, 300));
+
+        const mission = await getRandomMission(marketId);
+        setRandomMission(mission);
+      } catch (err) {
+        console.error("초기 미션 생성 또는 불러오기 실패:", err);
+        setRandomMission({
+          category: "감성형",
+          missionNumbers: "1",
+          title: "테스트 미션",
+          description: "테스트 미션 설명입니다",
+        });
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
+    const fetchCompletedMissions = async () => {
+      try {
+        const allCompleted = await Promise.all(
+          missionTypes.map((type) => getCompletedMissions(type.category))
+        );
+
+        const merged = allCompleted.flat();
+        setCollectedMissions(merged);
+      } catch (error) {
+        console.error("완료된 미션 불러오기 실패:", error);
+      }
+    };
+
+    fetchCompletedMissions();
+  }, []);
 
   const openPopup = () => {
     setPopupVisible(true);
@@ -86,14 +107,72 @@ export default function MissionPage() {
 
   const missionTypesWithCount = missionTypes.map((m) => ({
     ...m,
-    count: collectedMissions.filter((cm) => cm.type === m.type).length,
+    count: collectedMissions.filter((cm) => cm.category === m.category).length,
   }));
 
-  const handleRefreshClick = () => {
+  const handleRefreshClick = async () => {
     setRefreshClicked(true);
-    const randomIndex = Math.floor(Math.random() * currentMissions.length);
-    setRandomMission(currentMissions[randomIndex]);
-    setTimeout(() => setRefreshClicked(false), 1000);
+    try {
+      const mission = await getRandomMission(marketId);
+      setRandomMission(mission);
+    } catch (err) {
+      console.error("랜덤 미션 불러오기 실패:", err);
+    } finally {
+      setTimeout(() => setRefreshClicked(false), 1000);
+    }
+  };
+
+  const handleAuthenticateClick = async () => {
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.accept = "image/*";
+    fileInput.click();
+
+    fileInput.onchange = async () => {
+      const file = fileInput.files[0];
+      if (!file) return;
+
+      setAuthInProgress(true);
+
+      try {
+        // 서버로 인증 요청
+        const updatedMission = await authenticateMission(
+          randomMission.id,
+          file
+        );
+
+        // 상태 업데이트
+        setRandomMission(updatedMission);
+
+        const completed = await getCompletedMissions(updatedMission.category);
+        setCollectedMissions((prev) => {
+          const filtered = prev.filter(
+            (m) => m.category !== updatedMission.category
+          );
+          return [...filtered, ...completed];
+        });
+
+        if (updatedMission.completed) {
+          setAuthResult({ type: "success" });
+        } else {
+          setAuthResult({
+            type: "error",
+            message: updatedMission.failureReason || "인증에 실패했습니다.",
+          });
+        }
+      } catch (err) {
+        console.error(
+          "미션 인증 요청 실패:",
+          err.response?.data || err.message
+        );
+        const failureReason =
+          err.response?.data?.failureReason ||
+          "인증 요청 중 오류가 발생했습니다.";
+        setAuthResult({ type: "error", message: failureReason });
+      } finally {
+        setAuthInProgress(false);
+      }
+    };
   };
 
   useEffect(() => {
@@ -104,14 +183,9 @@ export default function MissionPage() {
     };
   }, [popupVisible, cannotExitVisible]);
 
-  useEffect(() => {
-    const randomIndex = Math.floor(Math.random() * currentMissions.length);
-    setRandomMission(currentMissions[randomIndex]);
-  }, []);
-
   const selectedTypeColor = selectedType
     ? missionTypes
-        .find((type) => type.type === selectedType)
+        .find((category) => category.category === selectedType)
         ?.bgColor.slice(0, 7)
     : null;
 
@@ -119,9 +193,9 @@ export default function MissionPage() {
     ? `${selectedTypeColor}60`
     : "#2B2B2B80";
 
-  // 선택된 타입에 해당하는 완료된 미션 목록
+  // 선택된 category에 해당하는 완료된 미션 목록
   const completedMissionsOfType = selectedType
-    ? collectedMissions.filter((m) => m.type === selectedType)
+    ? collectedMissions.filter((m) => m.category === selectedType)
     : [];
 
   return (
@@ -186,8 +260,8 @@ export default function MissionPage() {
 
         {/* 기존 카드 영역 */}
         <div
-          className={`absolute flex flex-col items-center z-20 gap-4 px-4 overflow-auto max-h-[464px] max-w-[309px] ${
-            selectedType ? "top-[120px]" : "top-[160px]"
+          className={`absolute flex flex-col items-center z-20 gap-4 px-4 overflow-auto h-[464px] max-w-[312px] hide-scrollbar ${
+            selectedType ? "top-[120px] h-full" : "top-[160px] h-[464px]"
           }`}
         >
           {selectedType ? (
@@ -204,27 +278,100 @@ export default function MissionPage() {
         </div>
 
         {/* 하단 버튼 */}
-        <div className="absolute bottom-24 left-1/2 -translate-x-1/2 w-[349px] px-4 flex justify-between z-50">
-          <button
-            onClick={openPopup}
-            className="w-[145px] h-[53px] flex items-center gap-2 px-4 py-2 border border-white rounded-xl text-white duration-250 ease-in-out active:bg-[#ffffffb9]"
-          >
-            <img
-              src={exit}
-              className="w-[24px] h-[24px] object-contain"
-              alt="탐험 종료"
-            />
-            <div className="ps-2">탐험 종료</div>
-          </button>
-          <button className="w-[145px] h-[53px] flex items-center gap-2 px-4 py-2 border border-black rounded-xl text-black bg-white duration-250 ease-in-out active:bg-[#A47764] active:text-white active:font-bold">
-            <img
-              src={vectorCamera}
-              className="w-[24px] h-[24px] object-contain"
-              alt="미션 인증"
-            />
-            <div className="ps-2">미션 인증</div>
-          </button>
+        <div>
+          {!selectedType ? (
+            <div className="absolute bottom-32 left-1/2 -translate-x-1/2 w-78 px-4 flex justify-between z-50">
+              <button
+                onClick={openPopup}
+                className="w-33 h-[50px] flex items-center px-4 border border-white rounded-xl text-white duration-250 ease-in-out active:bg-[#ffffffb9]"
+              >
+                <img
+                  src={exit}
+                  className="w-[24px] h-[24px] object-contain"
+                  alt="탐험 종료"
+                />
+                <div className="ps-2 font-medium">탐험 종료</div>
+              </button>
+              <button
+                onClick={handleAuthenticateClick}
+                className="w-33 h-[50px] flex items-center px-4 border border-black rounded-xl text-black bg-white duration-250 ease-in-out active:bg-[#A47764] active:text-white active:font-bold"
+              >
+                <img
+                  src={vectorCamera}
+                  className="w-[24px] h-[24px] object-contain"
+                  alt="미션 인증"
+                />
+                <div className="ps-2 font-medium">미션 인증</div>
+              </button>
+            </div>
+          ) : null}
         </div>
+
+        {authInProgress && (
+          <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black/70">
+            <img
+              src={loading}
+              alt="인증 중 로딩"
+              className="w-16 h-16 animate-spin mb-4"
+            />
+            <div className="text-white text-xl font-semibold">
+              이미지 검토 중...
+            </div>
+          </div>
+        )}
+
+        {/* 인증 결과 팝업 */}
+        {authResult && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/70">
+            <div className="w-[349px] h-auto bg-white rounded-3xl p-8 flex flex-col justify-between">
+              <div>
+                <div className="text-2xl font-medium">
+                  {authResult.type === "success"
+                    ? "미션 성공!"
+                    : "미션 실패..."}
+                </div>
+                <div className="mt-3 mb-6">
+                  {authResult.type === "success"
+                    ? "미션을 성공적으로 완료했어요! 계속 탐험하며 다음 미션에 도전해보세요."
+                    : authResult.message}
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                {/* 실패일 때만 취소 버튼 */}
+                {authResult.type === "error" && (
+                  <button
+                    onClick={() => setAuthResult(null)}
+                    className="flex-1 py-3 rounded-full bg-gray-200 text-gray-800"
+                  >
+                    취소
+                  </button>
+                )}
+
+                {/* 오른쪽 버튼 */}
+                <button
+                  className={`py-3 rounded-full bg-[#9A8C4F] text-white ${
+                    authResult.type === "success" ? "w-[50%] ml-auto" : "flex-1"
+                  }`}
+                  onClick={async () => {
+                    if (authResult.type === "success") {
+                      // 다음 미션 불러오기
+                      const mission = await getRandomMission(marketId);
+                      setRandomMission(mission);
+                    } else if (authResult.type === "error") {
+                      handleAuthenticateClick();
+                    }
+                    setAuthResult(null); // 팝업 닫기
+                  }}
+                >
+                  {authResult.type === "success"
+                    ? "다음 미션으로"
+                    : "다시 인증하기"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* 탐험 종료 팝업 */}
         {popupVisible && (
@@ -255,9 +402,16 @@ export default function MissionPage() {
                 <div className="flex gap-3">
                   <button
                     className="flex-1 py-3 rounded-full bg-gray-200 text-gray-800"
-                    onClick={() => {
-                      closePopup();
-                      navigate("/report");
+                    onClick={async () => {
+                      const completedImages = await getCompletedImages();
+                      console.log(completedImages);
+                      try {
+                        await endMission(marketId);
+                        closePopup();
+                        navigate("/reportentry");
+                      } catch (err) {
+                        setCannotExitVisible(true);
+                      }
                     }}
                   >
                     그만하기

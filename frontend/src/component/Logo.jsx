@@ -1,9 +1,11 @@
 import React, { useState } from "react";
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 export default function Logo({
     textColor = 'text-white',
-    iconColor = 'white'
+    iconColor = 'white',
+    isMissionActive
 }) {
+    const navigate = useNavigate();
     const [menuOpen, setMenuOpen] = useState(false);
     const closeMenu = () => setMenuOpen(false);
     const menuIconSvg = (
@@ -21,11 +23,20 @@ export default function Logo({
         </svg>
     );
 
+    const handleLogoClick = () => {
+    if (isMissionActive) {
+      navigate("/mission");
+    } else {
+      navigate("/");
+    }
+  };
+
     return (
         <header className={`fixed w-full z-20 transition-all duration-[250ms] overflow-hidden ${menuOpen ? "h-[215px]" : "h-[54px]"} backdrop-blur-[10px]`}>
             <div className="flex items-center h-[54px] w-full">
-                <Link to="/" className="ml-[13px] py-2">
+                <Link to="/" className="ml-[13px] py-4 pl-4">
                     <span
+                        onClick={handleLogoClick}
                         className={textColor}
                         style={{
                             fontFamily: 'MuseumClassic, sans-serif',

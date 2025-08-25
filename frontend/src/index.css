@@ -38,6 +38,78 @@
 
   transition: transform 0.2s ease-in-out, width 0.2s ease-in-out;
 }
+@keyframes grow-and-rotate {
+  0% {
+    transform: scale(0.2) rotate(0deg);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1) rotate(180deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.2) rotate(360deg);
+    opacity: 0.5;
+  }
+}
+
+.animate-grow-rotate {
+  animation: grow-and-rotate 1.5s ease-in-out infinite;
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera*/
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+@keyframes fade-shine {
+  0% {
+    transform: translateX(-300%) skewX(-30deg);
+    opacity: 0.0;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateX(500%) skewX(-30deg);
+    opacity: 0.0;
+  }
+}
+@keyframes unlock-fall-fade {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(30px) scale(0.8);
+    opacity: 0;
+  }
+}
+
+@keyframes unblur {
+  from {
+    filter: blur(4px);
+  }
+  to {
+    filter: blur(0px);
+  }
+}
+
+.animate-unlock-fall-fade {
+  animation: unlock-fall-fade 1.4s cubic-bezier(0.4, 0, 0.6, 1) forwards;
+}
+
+.animate-unblur {
+  animation: unblur 0s ease-out forwards;
+  animation-delay: 1s; /* 자물쇠가 사라지기 시작할 때쯤 블러가 풀리도록 지연 */
+}
+.animate-fade-shine {
+  animation: fade-shine 2.7s ease-in-out infinite alternate;
+}
+
 /* :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
