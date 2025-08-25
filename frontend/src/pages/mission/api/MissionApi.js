@@ -55,7 +55,12 @@ export async function endMission(marketId) {
 export async function authenticateMission(missionId, imageFile) {
   try {
     const formData = new FormData();
-    formData.append("imageFile", imageFile);
+formData.append("imageFile", imageFile);
+
+// 테스트용: FormData에 실제 파일이 들어 있는지 확인
+for (let [key, value] of formData.entries()) {
+  console.log(key, value);
+}
 
     const response = await api.post(
       `/missions/authenticate/${missionId}`,
