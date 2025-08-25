@@ -1,130 +1,59 @@
 import axios from 'axios';
 import api from '../../../api/Authorization';
 import Cookies from 'js-cookie';
-import imageCompression from 'browser-image-compression'; // 이미지 세탁 라이브러리
+import imageCompression from 'browser-image-compression';
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 const token = `Bearer ${Cookies.get("accessToken")}`;
 
-// 모바일 환경 감지
-function isMobile() {
-  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-}
-
-// Canvas를 이용한 이미지 정규화 (메타데이터 완전 제거)
-async function normalizeImage(imageFile) {
-  return new Promise((resolve, reject) => {
+// 이미지를 Canvas로 완전히 정리하는 헬퍼 함수
+async function cleanImageWithCanvas(file) {
+  return new Promise((resolve) => {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     const img = new Image();
     
-    img.onload = function() {
-      // 적절한 크기로 캔버스 설정
-      const maxSize = isMobile() ? 600 : 800;
+    img.onload = () => {
+      // 최대 해상도 제한
+      const maxWidth = 1920;
+      const maxHeight = 1920;
       let { width, height } = img;
       
       // 비율 유지하면서 크기 조정
       if (width > height) {
-        if (width > maxSize) {
-          height = (height * maxSize) / width;
-          width = maxSize;
+        if (width > maxWidth) {
+          height = (height * maxWidth) / width;
+          width = maxWidth;
         }
       } else {
-        if (height > maxSize) {
-          width = (width * maxSize) / height;
-          height = maxSize;
+        if (height > maxHeight) {
+          width = (width * maxHeight) / height;
+          height = maxHeight;
         }
       }
       
       canvas.width = width;
       canvas.height = height;
       
-      // 배경을 흰색으로 설정 (투명도 제거)
-      ctx.fillStyle = '#FFFFFF';
-      ctx.fillRect(0, 0, width, height);
-      
-      // 이미지를 캔버스에 그리기 (모든 메타데이터 제거됨)
+      // 이미지를 캔버스에 그리기 (메타데이터 제거됨)
       ctx.drawImage(img, 0, 0, width, height);
       
-      // Blob으로 변환
-      canvas.toBlob((blob) => {
-        if (blob) {
-          const normalizedFile = new File([blob], 'normalized-image.jpg', {
+      // JPEG로 변환 (메타데이터 완전 제거)
+      canvas.toBlob(
+        (blob) => {
+          const cleanFile = new File([blob], `cleaned_${Date.now()}.jpg`, {
             type: 'image/jpeg',
             lastModified: Date.now()
           });
-          resolve(normalizedFile);
-        } else {
-          reject(new Error('이미지 정규화 실패'));
-        }
-      }, 'image/jpeg', 0.8);
+          resolve(cleanFile);
+        },
+        'image/jpeg',
+        0.85 // 품질 85%
+      );
     };
     
-    img.onerror = () => reject(new Error('이미지 로드 실패'));
-    img.src = URL.createObjectURL(imageFile);
+    img.src = URL.createObjectURL(file);
   });
-}
-
-// --- 개선된 이미지 세탁 함수 ---
-async function cleanImage(imageFile) {
-  try {
-    // 원본 이미지 정보 로깅
-    console.log("원본 이미지 정보:", {
-      name: imageFile.name,
-      size: imageFile.size,
-      type: imageFile.type,
-      lastModified: imageFile.lastModified,
-      isMobile: isMobile()
-    });
-
-    // 1단계: Canvas로 메타데이터 완전 제거 및 정규화
-    const normalizedImage = await normalizeImage(imageFile);
-    
-    // 2단계: 환경별 압축 옵션 설정
-    let options;
-    
-    if (isMobile()) {
-      // 모바일 환경에서는 더 강한 정규화
-      options = {
-        maxSizeMB: 5, // 더 작게
-        maxWidthOrHeight: 600, // 더 작게
-        useWebWorker: true,
-        exifOrientation: 1, // 강제로 정상 방향
-        fileType: 'image/jpeg',
-        initialQuality: 0.7, // 품질 조금 낮춤
-        alwaysKeepResolution: false
-      };
-    } else {
-      options = {
-        maxSizeMB: 8,
-        maxWidthOrHeight: 800,
-        useWebWorker: true,
-        exifOrientation: 1,
-        fileType: 'image/jpeg',
-        initialQuality: 0.8,
-        alwaysKeepResolution: false
-      };
-    }
-
-    // 3단계: 최종 압축
-    const compressedFile = await imageCompression(normalizedImage, options);
-    
-    // 처리된 이미지 정보 로깅
-    console.log("이미지 세탁 후 파일:", {
-      name: compressedFile.name,
-      size: compressedFile.size,
-      type: compressedFile.type,
-      lastModified: compressedFile.lastModified,
-      sizeReduction: `${((imageFile.size - compressedFile.size) / imageFile.size * 100).toFixed(1)}%`
-    });
-    
-    return compressedFile;
-  } catch (error) {
-    console.error("이미지 세탁 실패:", error);
-    // 세탁에 실패하면 원본 파일 반환 (최후의 수단)
-    console.warn("원본 파일로 fallback 처리");
-    return imageFile;
-  }
 }
 
 // 미션 시작
@@ -170,39 +99,83 @@ export async function endMission(marketId) {
   }
 }
 
-// 개선된 미션 인증
+// 미션 인증 (이미지 압축, 방향 보정, 메타데이터 정리)
 export async function authenticateMission(missionId, imageFile) {
+  // 이미지 압축 및 처리 옵션 설정
+  const options = {
+    maxSizeMB: 3,                    // 최대 3MB로 제한
+    maxWidthOrHeight: 1920,          // 최대 해상도 제한
+    useWebWorker: true,
+    fileType: 'image/jpeg',          // 강제로 JPEG 형식으로 변환
+    initialQuality: 0.8,             // 초기 품질 설정
+    alwaysKeepResolution: false,     // 해상도 조정 허용
+    exifOrientation: 1,              // EXIF 방향 정보 초기화
+  };
+
   try {
-    console.log(`[미션 인증 시작] missionId: ${missionId}, 환경: ${isMobile() ? 'Mobile' : 'Desktop'}`);
+    console.log(`처리 전 원본 이미지:`, {
+      name: imageFile.name,
+      size: `${(imageFile.size / 1024 / 1024).toFixed(2)} MB`,
+      type: imageFile.type
+    });
+
+    // 파일 타입 검증
+    if (!imageFile.type.startsWith('image/')) {
+      throw new Error('이미지 파일만 업로드 가능합니다.');
+    }
+
+    let processedImageFile;
+
+    // 큰 이미지이거나 메타데이터 문제가 있을 수 있는 경우 Canvas 사용
+    if (imageFile.size > 10 * 1024 * 1024) { // 10MB 이상이면 Canvas 사용
+      console.log('큰 이미지 감지, Canvas로 정리 중...');
+      processedImageFile = await cleanImageWithCanvas(imageFile);
+    } else {
+      // imageCompression 라이브러리 사용
+      processedImageFile = await imageCompression(imageFile, options);
+    }
     
-    // 이미지 세탁 (정상적인 이미지 형식으로 변환)
-    const cleanedImage = await cleanImage(imageFile);
+    console.log(`처리 후 이미지:`, {
+      name: processedImageFile.name,
+      size: `${(processedImageFile.size / 1024 / 1024).toFixed(2)} MB`,
+      type: processedImageFile.type
+    });
 
+    // FormData 생성
     const formData = new FormData();
-    formData.append("imageFile", cleanedImage);
+    const cleanFileName = `mission_${missionId}_${Date.now()}.jpg`;
+    formData.append("imageFile", processedImageFile, cleanFileName);
 
-    // Content-Type을 명시하지 않고 브라우저가 자동 설정하도록 함
     const response = await api.post(
       `/missions/authenticate/${missionId}`,
       formData,
       {
         headers: {
-          // 'Content-Type': 'multipart/form-data', // 제거 - 브라우저가 자동 설정
+          'Content-Type': 'multipart/form-data',
         },
-        // 타임아웃 설정 (모바일에서 업로드가 느릴 수 있음)
-        timeout: 30000, // 30초
+        timeout: 30000, // 30초 타임아웃
       }
     );
     
-    console.log('[미션 인증 성공] mission data:', response.data);
+    console.log('[미션 인증] mission data:', response.data);
     return response.data;
+    
   } catch (error) {
-    console.error('[미션 인증 실패]', {
-      missionId,
-      error: error.response?.data || error.message,
-      status: error.response?.status,
-      isMobile: isMobile()
+    console.error('미션 인증 실패:', {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status
     });
+    
+    // 구체적인 에러 메시지 제공
+    if (error.response?.status === 413) {
+      throw new Error('이미지 파일이 너무 큽니다. 더 작은 이미지를 선택해주세요.');
+    } else if (error.response?.status === 415) {
+      throw new Error('지원되지 않는 이미지 형식입니다.');
+    } else if (error.message.includes('timeout')) {
+      throw new Error('업로드 시간이 초과되었습니다. 다시 시도해주세요.');
+    }
+    
     throw error;
   }
 }
