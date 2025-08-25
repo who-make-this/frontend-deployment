@@ -1,4 +1,3 @@
-// MissionPage.jsx
 import React, { useState, useEffect, useRef } from "react";
 import MainPageImg from "../../assets/mainPage.svg";
 import Logo from "../../component/Logo";
@@ -23,43 +22,9 @@ import {
   getCompletedImages,
 } from "./api/MissionApi";
 
-// ---------------------------
-// 이미지 리사이즈 & 메타데이터 제거
-// ---------------------------
-const compressImage = (file, maxWidth = 1024, maxHeight = 1024) => {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.onload = () => {
-      let { width, height } = img;
-
-      if (width > maxWidth || height > maxHeight) {
-        const ratio = Math.min(maxWidth / width, maxHeight / height);
-        width *= ratio;
-        height *= ratio;
-      }
-
-      const canvas = document.createElement("canvas");
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext("2d");
-      ctx.drawImage(img, 0, 0, width, height);
-
-      canvas.toBlob(
-        (blob) =>
-          resolve(new File([blob], file.name, { type: file.type })),
-        file.type,
-        0.8
-      );
-    };
-    img.src = URL.createObjectURL(file);
-  });
-};
-
-// ---------------------------
-// MissionPage Component
-// ---------------------------
 export default function MissionPage() {
   const marketId = 1;
+
   const navigate = useNavigate();
 
   const [selectedType, setSelectedType] = useState(null);
@@ -70,9 +35,9 @@ export default function MissionPage() {
   const [randomMission, setRandomMission] = useState(null);
   const [collectedMissions, setCollectedMissions] = useState([]);
   const [authResult, setAuthResult] = useState(null);
-  const [authInProgress, setAuthInProgress] = useState(false);
-
+  const [authInProgress, setAuthInProgress] = useState(false); // 인증 중 상태
   const hasFetched = useRef(false);
+
   const [refreshClicked, setRefreshClicked] = useState(false);
   const [refreshHovered, setRefreshHovered] = useState(false);
 
@@ -82,7 +47,7 @@ export default function MissionPage() {
     { category: "모험형", count: 5, icon: typeTravel, bgColor: "#889F6960" },
   ];
 
-  // 초기 랜덤 미션
+  // 초기 랜덤 미션 불러오기
   useEffect(() => {
     if (hasFetched.current) return;
     hasFetched.current = true;
@@ -90,11 +55,12 @@ export default function MissionPage() {
     (async () => {
       try {
         await createMission(marketId);
-        await new Promise((res) => setTimeout(res, 300));
+        await new Promise((resolve) => setTimeout(resolve, 300));
+
         const mission = await getRandomMission(marketId);
         setRandomMission(mission);
       } catch (err) {
-        console.error("초기 미션 생성/불러오기 실패:", err);
+        console.error("초기 미션 생성 또는 불러오기 실패:", err);
         setRandomMission({
           category: "감성형",
           missionNumbers: "1",
@@ -111,13 +77,38 @@ export default function MissionPage() {
         const allCompleted = await Promise.all(
           missionTypes.map((type) => getCompletedMissions(type.category))
         );
-        setCollectedMissions(allCompleted.flat());
-      } catch (err) {
-        console.error("완료된 미션 불러오기 실패:", err);
+
+        const merged = allCompleted.flat();
+        setCollectedMissions(merged);
+      } catch (error) {
+        console.error("완료된 미션 불러오기 실패:", error);
       }
     };
+
     fetchCompletedMissions();
   }, []);
+
+  const openPopup = () => {
+    setPopupVisible(true);
+    setTimeout(() => setPopupActive(true), 20);
+  };
+
+  const closePopup = () => {
+    setPopupActive(false);
+    setTimeout(() => setPopupVisible(false), 300);
+    if (collectedMissions.length === 0) {
+      setCannotExitVisible(true);
+    }
+  };
+
+  const closeCannotExit = () => {
+    setCannotExitVisible(false);
+  };
+
+  const missionTypesWithCount = missionTypes.map((m) => ({
+    ...m,
+    count: collectedMissions.filter((cm) => cm.category === m.category).length,
+  }));
 
   const handleRefreshClick = async () => {
     setRefreshClicked(true);
@@ -131,14 +122,10 @@ export default function MissionPage() {
     }
   };
 
-  // ---------------------------
-  // 인증 버튼 클릭
-  // ---------------------------
   const handleAuthenticateClick = async () => {
     const fileInput = document.createElement("input");
     fileInput.type = "file";
     fileInput.accept = "image/*";
-    fileInput.capture = "environment"; // 모바일 카메라 바로 열기
     fileInput.click();
 
     fileInput.onchange = async () => {
@@ -148,15 +135,13 @@ export default function MissionPage() {
       setAuthInProgress(true);
 
       try {
-        // 이미지 리사이즈 + 메타데이터 제거
-        const compressedFile = await compressImage(file);
-
-        // 서버 인증
+        // 서버로 인증 요청
         const updatedMission = await authenticateMission(
           randomMission.id,
-          compressedFile
+          file
         );
 
+        // 상태 업데이트
         setRandomMission(updatedMission);
 
         const completed = await getCompletedMissions(updatedMission.category);
@@ -176,11 +161,14 @@ export default function MissionPage() {
           });
         }
       } catch (err) {
-        console.error("미션 인증 요청 실패:", err.response?.data || err.message);
-        setAuthResult({
-          type: "error",
-          message: err.response?.data?.detail || "서버 오류 발생: 잠시 후 다시 시도해주세요.",
-        });
+        console.error(
+          "미션 인증 요청 실패:",
+          err.response?.data || err.message
+        );
+        const failureReason =
+          err.response?.data?.failureReason ||
+          "인증 요청 중 오류가 발생했습니다.";
+        setAuthResult({ type: "error", message: failureReason });
       } finally {
         setAuthInProgress(false);
       }
