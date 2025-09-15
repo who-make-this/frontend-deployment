@@ -102,8 +102,8 @@ export default function Secretpage() {
     };
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-100">
-            <div className="w-[375px] h-[812px] bg-white shadow-sm relative overflow-hidden">
+        <div className="w-[375px] h-[812px] flex items-center justify-center min-h-screen bg-gray-100">
+            <div className="w-full h-full bg-white shadow-sm relative overflow-hidden">
                 <img src={SecretPageImg} alt="Secretstory Page" className="absolute top-0 left-0 w-full h-full object-cover" />
                 <div className="absolute top-0 left-0 w-full h-full pointer-events-none z-0" style={{ backgroundColor: "#2B2B2B4D" }} />
                 
