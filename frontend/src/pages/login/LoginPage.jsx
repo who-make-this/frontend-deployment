@@ -48,7 +48,7 @@ export default function LoginPages({setIsLoggedIn}) {
       <div className="fixed top-0 left-0 w-full z-30">
         <Logo textColor="black" iconColor="black" />
       </div>
-      <div className=" bg-white shadow-sm relative flex items-center justify-center overflow-hidden ">
+      <div className="bg-white shadow-sm relative flex items-center justify-center overflow-hidden ">
         <img
           src={loginImg}
           alt="Main Page"

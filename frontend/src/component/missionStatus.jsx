@@ -4,7 +4,7 @@ export default function MissionStatus({ icon, label, value, onClick, bgColor = "
       role="button"
       onClick={onClick}
       style={{ backgroundColor: bgColor }}
-      className="h-[32px] flex items-center w-full p-1.5 rounded-md hover:bg-gray-200 justify-between"
+      className="h-[32px] flex items-center w-full p-[0.3rem] rounded-md hover:bg-gray-200 justify-between"
     >
       <img src={icon} alt={label} className="w-[31px] h-[28px] object-contain" />
 
