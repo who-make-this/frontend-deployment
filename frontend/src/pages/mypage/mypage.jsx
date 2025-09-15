@@ -100,8 +100,8 @@ export default function MyPage() {
   const toColorClass = typeGradientColors[userData.userType] || 'to-[#D19B98]';
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-[375px] h-[812px] bg-white shadow-sm relative overflow-hidden">
+    <div className="w-[375px] h-[812px] flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="w-full h-full bg-white shadow-sm relative overflow-hidden">
         <img src={MyPageImg} alt="MyPage Background" className="absolute top-0 left-0 w-full h-full object-cover" />
         <Logo textColor="text-black" iconColor="black" />
         <img src={TicketImg} alt="미션 인증" className="w-[355px] h-[655px] absolute top-[86px] left-1/2 -translate-x-1/2 object-contain" />

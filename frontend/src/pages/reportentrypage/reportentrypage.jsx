@@ -179,8 +179,8 @@ export default function JournalEntryPage({ setIsMissionActive }) {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-[375px] h-[812px] bg-white shadow-sm relative overflow-hidden">
+    <div className="w-[375px] h-[812px] flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="w-full h-full bg-white shadow-sm relative overflow-hidden">
         <ReportbgImg
           className="absolute top-0 left-0 w-full h-full"
           preserveAspectRatio="none"

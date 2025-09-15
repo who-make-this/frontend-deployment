@@ -108,7 +108,7 @@ export default function ReportPage() {
 
     return (
         <div className="w-[375px] h-[812px] flex items-center justify-center min-h-screen bg-gray-100">
-            <div className="w-[375px] h-full bg-white shadow-sm relative overflow-hidden">
+            <div className="w-full h-full bg-white shadow-sm relative overflow-hidden">
                 {loading && <LoadingSpinner />}
                 <ReportbgImg className="absolute top-0 left-0 w-full h-full" preserveAspectRatio="none" />
                 <div className="absolute top-0 left-0 w-full h-full pointer-events-none z-10" style={{ backgroundColor: "#2B2B2B4D" }} />
