@@ -46,7 +46,7 @@ export default function LoginPages({setIsLoggedIn}) {
   return (
     <div className="w-[375px] h-[812px] flex min-h-screen bg-gray-100">
       <div className="fixed top-0 left-0 w-full z-30">
-        <Logo textColor="black" iconColor="black" />
+        <Logo textColor="black" iconColor="black" backgroundBlur="0px" />
       </div>
       <div className="bg-white shadow-sm relative flex items-center justify-center overflow-hidden ">
         <img
@@ -55,7 +55,7 @@ export default function LoginPages({setIsLoggedIn}) {
           className="w-full h-full object-cover"
         />
         <div
-          className="absolute top-0 left-0 w-full h-full pointer-events-none z-10 backdrop-blur-[20px]"
+          className="absolute top-13 left-0 w-full h-full pointer-events-none z-10 backdrop-blur-[20px]"
           style={{ backgroundColor: "#2B2B2B33" }}
         />
 

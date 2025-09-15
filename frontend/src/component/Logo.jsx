@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 export default function Logo({
     textColor = 'text-white',
     iconColor = 'white',
+    backgroundBlur = '10px',
     isMissionActive
 }) {
     const navigate = useNavigate();
@@ -32,7 +33,7 @@ export default function Logo({
   };
 
     return (
-        <header className={`fixed w-full z-20 transition-all duration-[250ms] overflow-hidden ${menuOpen ? "h-[215px]" : "h-[54px]"} backdrop-blur-[10px]`}>
+        <header className={`fixed w-full z-20 transition-all duration-[250ms] overflow-hidden ${menuOpen ? "h-[215px]" : "h-[54px]"} backdrop-blur-[${backgroundBlur}]`}>
             <div className="flex items-center h-[54px] w-full">
                 <Link to="/" className="ml-[0px] py-4 pl-4">
                     <span
