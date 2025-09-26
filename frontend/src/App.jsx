@@ -1,11 +1,7 @@
 import { useState, useEffect } from "react";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
-import "./App.css";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import Cookies from "js-cookie";
+import { fetchUserInfo } from "./pages/login/api/LoginAPI";
 
 import MainPage from "./pages/main/mainPage";
 import MissionPage from "./pages/mission/missionpage";
@@ -24,6 +20,30 @@ function App() {
   const [isMissionActive, setIsMissionActive] = useState(false);
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      const token = Cookies.get("token");
+
+      if (token) {
+        try {
+          const userInfo = await fetchUserInfo();
+          
+          setIsLoggedIn(true);
+
+        } catch (error) {
+          console.error("인증 토큰 오류:", error);
+          Cookies.remove("token");
+          setIsLoggedIn(false);
+        }
+      }
+      setLoading(false); 
+    };
+
+    checkAuthStatus();
+  }, []);
 
   // 화면 크기 비율 계산
   useEffect(() => {
@@ -36,6 +56,10 @@ function App() {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  if (loading) {
+        return null;
+    }
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100 overflow-hidden font-[pretendard]">
