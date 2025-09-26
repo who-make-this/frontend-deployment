@@ -55,14 +55,14 @@ export default function ReportCard({ reportData }) {
           </div>
 
           <div className="relative flex-grow ">
-            <div className="absolute top-[14px] left-[18px]">
+            <div className="absolute top-[16px] left-[18px]">
               <p className="text-[16px] text-white">탐험 일시</p>
             </div>
-            <div className="absolute top-[56px] font-[500] underline decoration-1 left-[18px] space-y-1">
-              <p className="text-[18px] text-[#2B2B2B] tracking-[-1px] ">
+            <div className="absolute top-[56px] font-[500] left-[18px] space-y-1 w-35">
+              <p className="text-[18px] text-[#2B2B2B] tracking-[-1px] border-b border-black w-full leading-tight mb-2.5">
                 {reportData.date}
               </p>
-              <p className="text-[18px] mt1 text-[#2B2B2B] tracking-[-0.3px]">
+              <p className="text-[18px] mt1 text-[#2B2B2B] tracking-[-0.3px] border-b border-black w-full leading-tight">
                 {reportData.timeRange}
               </p>
             </div>
@@ -99,13 +99,13 @@ export default function ReportCard({ reportData }) {
                 {reportData.results.totalScore}점
               </span>
             </div>
-            <div className="flex justify-between items-center border-b border-dashed font-[600] text-1rem border-gray-400 pr-2">
+            <div className="flex justify-between items-center border-b border-dashed font-[600] text-1rem border-gray-400  pr-2">
               <span>획득 마일리지</span>
               <span className="font-[600] text-1rem">
                 {reportData.results.mileage}
               </span>
             </div>
-            <div className="flex justify-between items-center font-[600] pr-2  text-1rem">
+            <div className="flex justify-between items-center border-b border-dashed font-[600] text-1rem border-gray-400  pr-2">
               <span>이번 달 까지</span>
               <span className="font-[600] text-1rem">
                 {reportData.results.thisMonthTotal}

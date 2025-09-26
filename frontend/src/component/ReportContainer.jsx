@@ -25,7 +25,7 @@ export default function ReportContainer({ report, activeView, setActiveView }) {
                 <button 
                     // 4. props로 받은 setActiveView 함수를 호출합니다.
                     onClick={() => setActiveView(prev => prev === 'report' ? 'diary' : 'report')}
-                    className={`w-full font-[600] py-3 text-[16px] px-4 rounded-lg shadow-md transition-colors flex items-center justify-center gap-x-2 ${buttonClass}`}
+                    className={`w-full font-[600] py-3 text-[16px] px-4 rounded-lg transition-colors flex items-center justify-center gap-x-2 ${buttonClass}`}
                 >
                     <img 
                         src={activeView === 'report' ? FlipWhite : FlipBlack} 
