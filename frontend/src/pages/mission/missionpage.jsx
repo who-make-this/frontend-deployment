@@ -576,42 +576,11 @@ export default function MissionPage({ setIsMissionActive }) {
                   className="flex-1 py-2 rounded-full bg-gray-200 text-gray-800"
                   onClick={() => setIsMissionActive(false)}
                 >
-                  나가기
+                  종료
                 </button>
                 <button
                   className="flex-1 py-2 rounded-full bg-[#9A8C4F] text-white"
                   onClick={() => setExitStep("none")}
-                >
-                  취소
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* 탐험 종료 불가 팝업 */}
-        {(exitStep === "cannotExit" || cannotExitVisible) && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70">
-            <div className="bg-white rounded-2xl p-6 w-[320px] text-center">
-              <div className="text-xl font-bold mb-4">
-                정말 탐험을 그만하시겠습니까?
-              </div>
-              <div className="mb-4">
-                종료하면 지금까지 진행했던 내용이 저장되지 않고 사라지게 돼요.
-              </div>
-              <div className="flex gap-3">
-                <button
-                  className="flex-1 py-2 rounded-full bg-gray-200 text-gray-800"
-                  onClick={() => setIsMissionActive(false)}
-                >
-                  나가기
-                </button>
-                <button
-                  className="flex-1 py-2 rounded-full bg-[#9A8C4F] text-white"
-                  onClick={() => {
-                    setExitStep("none");
-                    setCannotExitVisible(false);
-                  }}
                 >
                   취소
                 </button>
