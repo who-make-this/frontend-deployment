@@ -17,7 +17,7 @@ export default function CompleteMission({ missions }) {
   };
 
   return (
-    <div className="grid grid-cols-2 gap-4 px-2 no-scrollbar">
+    <div className="grid grid-cols-2 gap-4 px-2 mb-5">
       {missions.map((mission, index) => (
         <button
           key={index}
@@ -31,7 +31,7 @@ export default function CompleteMission({ missions }) {
       {/* 카드 뒤집기 */}
       {selectedMission && (
         <div
-          className="fixed inset-0 bg-black/70 flex flex-col items-center justify-center z-100 no-scrollbar"
+          className="fixed inset-0 bg-black/70 flex flex-col items-center justify-center z-100"
           onClick={closeOverlay} // 뒷배경 클릭 닫기
         >
           <div

@@ -12,7 +12,7 @@ export default function MissionCard({
 }) {
   const cardRef = useRef(null);
 
-  const [fontSize, setFontSize] = useState(24);
+  const [fontSize, setFontSize] = useState(28);
   const [cardHeight, setCardHeight] = useState(480);
   const [paddingTop, setPaddingTop] = useState("pt-12");
   const [borderRadius, setBorderRadius] = useState("24px");
@@ -23,14 +23,14 @@ export default function MissionCard({
       if (!cardRef.current) return;
       const width = cardRef.current.offsetWidth;
 
-      const newFontSize = Math.min(Math.max(width / 10, 12), 24);
+      const newFontSize = Math.min(Math.max(width / 10, 12), 26);
       setFontSize(newFontSize);
 
-      const newHeight = (480 / 306) * width;
+      const newHeight = (500 / 306) * width;
       setCardHeight(newHeight);
 
       setPaddingTop(width <= 250 ? "pt-4" : "pt-12");
-      setBorderRadius(width <= 250 ? "16px" : "24px");
+      setBorderRadius(width <= 250 ? "16px" : "20px");
       setPadding(width <= 250 ? "10" : "24");
     }
 
@@ -130,7 +130,7 @@ export default function MissionCard({
         <div
           className="font-medium text-[#2B2B2B] z-50"
           style={{
-            fontSize: `${fontSize * 0.66}px`,
+            fontSize: `${fontSize * 0.56}px`,
             paddingTop: `${padding * 0.2}px`,
           }}
         >

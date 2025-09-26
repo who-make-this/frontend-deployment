@@ -36,7 +36,7 @@ export default function MissionTypeButtons({
             <button
               key={index}
               onClick={() => !selectedType && setSelectedType(m.category)}
-              className="whitespace-nowrap transition-transform duration-500 ease-in-out transition-opacity duration-300"
+              className="whitespace-nowrap transition-transform duration-500 ease-in-out"
               style={{
                 transform: isSelected
                   ? `translateX(${translateXValues[index]}px)`
