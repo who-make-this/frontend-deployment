@@ -39,7 +39,7 @@ export default function ReportCard({ reportData }) {
           <h1 className="text-2xl font-semibold text-[#2B2B2B]">
             {reportData.marketName} <br /> 탐험
           </h1>
-          <img src={HeadphoneIcon} alt="아이콘" className="w-[60px] h-[60px]" />
+          <img src={HeadphoneIcon} alt="아이콘" className="w-[60px] h-[60px] mr-5" />
         </header>
 
         <section className="flex h-[170px]">
