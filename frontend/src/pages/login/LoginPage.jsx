@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { signIn, fetchUserInfo } from "./api/LoginAPI";
 import loginImg from "../../assets/loginImg.png";
@@ -13,6 +13,31 @@ export default function LoginPages({setIsLoggedIn}) {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    const runAutoLogin = async () => {
+      console.log("🚀 개발용 자동 로그인 시도 중...");
+      setLoading(true);
+
+      try {
+        await signIn({ 
+          username: "whomadethis", 
+          password: "WhoMadeThis!2#" 
+        });
+
+        const userData = await fetchUserInfo();
+        console.log("✅ 자동 로그인 성공:", userData);
+
+        setIsLoggedIn(true);
+        navigate("/");
+      } catch (err) {
+        console.log("❌ 자동 로그인 실패 (수동 로그인 필요)");
+        setLoading(false); 
+      }
+    };
+
+    runAutoLogin();
+  }, [navigate, setIsLoggedIn]); // 의존성 배열
 
   const handleLogin = async (e) => {
     e.preventDefault();
