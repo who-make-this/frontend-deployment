@@ -31,7 +31,11 @@ api.interceptors.request.use(
       // 💡 토큰이 있다면 요청 헤더에 자동으로 추가
       config.headers.Authorization = `Bearer ${token}`;
     }
-    return config;
+    return (
+    <AuthContext.Provider value={{ user, loading, login: signIn, logout: signOut }}>
+      {!loading && children}
+    </AuthContext.Provider>
+  );
   },
   (error) => {
     return Promise.reject(error);
