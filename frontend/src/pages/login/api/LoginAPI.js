@@ -13,8 +13,20 @@ export const api = axios.create({
 
 // 🚀 2. 요청 Interceptor 설정: 모든 요청 전에 쿠키에서 토큰을 가져와 헤더에 추가
 api.interceptors.request.use(
-  (config) => {
+  async (config) => {
     const token = Cookies.get("token");
+
+    if (!token) {
+        try {
+          token = await signIn({ 
+            id: "whomadethis", 
+            password: "WhoMadeThis!2#" 
+          });
+        } catch (error) {
+          console.error("자동 로그인 실패 (아이디/비번 확인 필요):", error);
+        }
+      }
+
     if (token) {
       // 💡 토큰이 있다면 요청 헤더에 자동으로 추가
       config.headers.Authorization = `Bearer ${token}`;
